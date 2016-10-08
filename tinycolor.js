@@ -287,6 +287,48 @@ tinycolor.fromRatio = function(color, opts) {
     return tinycolor(color, opts);
 };
 
+tinycolor.parseLegacy = function(color, opts) {
+    var rgb = inputToRGB(parseLegacy(color));
+    rgb.format = "legacy";
+    var result = tinycolor(rgb, opts);
+    result._originalInput = color;
+    return result;
+}
+
+// https://www.w3.org/TR/2011/WD-html5-20110525/common-microsyntaxes.html#rules-for-parsing-a-legacy-color-value
+function parseLegacy(color) {
+    if (!(typeof color === "string" || color instanceof String) || color === "") {
+        return color;
+    }
+    color = color.replace(/^\s+|\s+$/g, "").toLowerCase(); // Strip leading and trailing whitespace
+    if (color === "transparent" || names[color] || (color.charAt(0) === "#" && matchers.hex3.match(color))) {
+        return color;
+    }
+    color = color.replace(/[^\u0000-\uFFFF]/g, "00"); // Replace any characters that are not in the basic multilingual plane with "00"
+    if (color.length > 128) { color = color.substr(0, 128); } // Truncate color if it's longer than 128 characters
+    if (color.charAt(0) === "#") { color = color.slice(1); } // If the first character is a "#", remove it
+    color = color.replace(/[^0-9A-F]/gi, "0");
+    while (color.length === 0 || (color.length / 3) % 1 !== 0) { // While color's length is zero or not a multiple of three
+        color += "0"; // Append a "0" to color
+    }
+    var length = Math.ceil(color.length / 3);
+    var parts = color.match(new RegExp(".{1," + length + "}", "g")); // Split color into three strings of equal length
+    if (length > 8) {
+        parts = parts.map(function(part) { return part.slice(-8); }); // Keep the last 8 characters of each part
+        length = 8;
+    }
+    // While length is greater than two and the first character in each component is a "0"
+    while (length > 2 && parts.every(function(part) { return part.charAt(0) === "0"; })) {
+        parts = parts.map(function(part) { return part.slice(1); }); // Remove the leading "0"
+        length--;
+    }
+    if (length > 2) {
+        parts = parts.map(function(part) { return part.slice(0, 2); }); // Leave the first two characters of each part
+    }
+
+    return "#" + parts.join("");
+}
+
 // Given a string or object, convert that input to RGB
 // Possible string inputs:
 //
@@ -312,7 +354,7 @@ function inputToRGB(color) {
     var ok = false;
     var format = false;
 
-    if (typeof color == "string") {
+    if (typeof color === "string" || color instanceof String) {
         color = stringInputToObject(color);
     }
 
