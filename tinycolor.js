@@ -305,14 +305,14 @@ function parseLegacy(color) {
         return color;
     }
     color = color.replace(/[^\u0000-\uFFFF]/g, "00"); // Replace any characters that are not in the basic multilingual plane with "00"
-    if (color.length > 128) { color = color.substr(0, 128); } // Truncate color if it's longer than 128 characters
-    if (color.charAt(0) === "#") { color = color.slice(1); } // If the first character is a "#", remove it
+    if (color.length > 128) { color = color.substr(0, 128); } // Truncate color to 128 characters
+    if (color.charAt(0) === "#") { color = color.slice(1); }
     color = color.replace(/[^0-9A-F]/gi, "0");
     while (color.length === 0 || (color.length / 3) % 1 !== 0) { // While color's length is zero or not a multiple of three
-        color += "0"; // Append a "0" to color
+        color += "0";
     }
     var length = Math.ceil(color.length / 3);
-    var parts = color.match(new RegExp(".{1," + length + "}", "g")); // Split color into three strings of equal length
+    var parts = color.match(new RegExp(".{1," + length + "}", "g")); // Split color into three equal length strings
     if (length > 8) {
         parts = parts.map(function(part) { return part.slice(-8); }); // Keep the last 8 characters of each part
         length = 8;
@@ -320,6 +320,10 @@ function parseLegacy(color) {
     // While length is greater than two and the first character in each component is a "0"
     while (length > 2 && parts.every(function(part) { return part.charAt(0) === "0"; })) {
         parts = parts.map(function(part) { return part.slice(1); }); // Remove the leading "0"
+        length--;
+    }
+    while (length < 2) {
+        parts = parts.map(function(part) { return "0" + part; });
         length--;
     }
     if (length > 2) {
