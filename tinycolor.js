@@ -324,7 +324,7 @@ function parseLegacy(color) {
     }
     while (length < 2) {
         parts = parts.map(function(part) { return "0" + part; });
-        length--;
+        length++;
     }
     if (length > 2) {
         parts = parts.map(function(part) { return part.slice(0, 2); }); // Leave the first two characters of each part
