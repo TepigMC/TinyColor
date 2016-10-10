@@ -301,7 +301,7 @@ function parseLegacy(color) {
         return color;
     }
     color = color.replace(/^\s+|\s+$/g, "").toLowerCase(); // Strip leading and trailing whitespace
-    if (color === "transparent" || names[color] || /^#[0-9a-f]{3}$/i.match(color)) {
+    if (color === "transparent" || names[color] || color.match(/^#[0-9a-f]{3}$/i)) {
         return color;
     }
     color = color.replace(/[^\u0000-\uFFFF]/g, "00"); // Replace any characters that are not in the basic multilingual plane with "00"
